@@ -1,0 +1,16 @@
+#world {
+	position: relative;
+	transform: scale(0.5);
+	transform-origin: top left;
+}
+
+#lattice>.cell {
+	width: 124px;
+	height: 124px;
+	position: absolute;
+	border: 2px solid rgba(0,0,0,0.1);
+}
+
+#lattice>.cell:hover {
+	border: 2px solid rgba(255,70,0,1);
+}
