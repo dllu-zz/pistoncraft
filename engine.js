@@ -1,13 +1,16 @@
 var WIDTH = 64, HEIGHT = 64;
 var RESOLUTION = 128;
+var TOOLBAR_RESOLUTION = 50;
 var MINIMAP_RESOLUTION = 3;
 
-var buildings, $buildings, items, $items, wires, $wires;
+var buildings, $buildings, items, $items, wires, $wires, motion;
+
+var cycle = 0;
 
 var TECHTREE = {};
 
-var buildmode = 0;
-var buildings_spec = {
+var buildmode;
+var BUILDING_SPEC = {
     q:{
         x:0,
         y:0,
@@ -60,6 +63,12 @@ var buildings_spec = {
             <div class="head"></div>\
             <div class="body"></div>\
         </div>'
+    }, t:{
+        x:4,
+        y:0,
+        name:'Wall',
+        html:
+        '<div class="building wall"></div>'
     }, a:{
         x:0,
         y:1,
@@ -87,7 +96,41 @@ var buildings_spec = {
             <div class="body"></div>\
             <div class="hole"></div>\
         </div>'
+    }, f:{
+        x:3,
+        y:1,
+        name:'Trash Chute',
+        html:
+        '<div class="building trash">\
+            <div class="body"></div>\
+            <div class="hole"></div>\
+        </div>'
+    }, g:{
+        x:4,
+        y:1,
+        name:'Container',
+        html:
+        '<div class="building box"></div>'
+    }, z:{
+        x:0,
+        y:2,
+        name:'Clock',
+        html:
+        '<div class="building clock"></div>'
+    }, x:{
+        x:1,
+        y:2,
+        name:'Wire'
     }
+};
+
+var WIRENAMES = {
+    WIRE: 128, // 1...0000: idle wire - do not actuate pistons
+    WIRE1: 129,// 1...0001
+    WIRE2: 130,// 1...0010
+    WIRE3: 132,// 1...0100
+    WIRE4: 136,// 1...1000
+    NOTHING: 0// 000: nothing
 };
 
 
@@ -121,7 +164,8 @@ function init() {
             );
         }
     }
-    $('.cell').click(make_building);
+    $('.cell').click(cellclick);
+    $('.cell').hover(cellin, function() {$('.info-layer, .info-layer-caption').html('');});
     ui_init();
 };
 
@@ -133,10 +177,10 @@ function sizes() {
 
 function ui_init() {
 
-    $.each(buildings_spec, function(k, v) {
+    $.each(BUILDING_SPEC, function(k, v) {
         var $button = $('<div>').addClass('button').html(v.html).css({
-            left: v.x*RESOLUTION/2 + 'px',
-            top: v.y*RESOLUTION/2 + 'px'
+            left: v.x*TOOLBAR_RESOLUTION + 'px',
+            top: v.y*TOOLBAR_RESOLUTION + 'px'
         }).data({
             mode:k
         }).attr('id',k);
@@ -148,9 +192,9 @@ function ui_init() {
         buildmode = $(this).data('mode');
         $('#thumbnail').html('');
         $('#thumbnail').append(
-            $('<div>').addClass('caption').text(buildings_spec[buildmode].name)
+            $('<div>').addClass('caption').text(BUILDING_SPEC[buildmode].name)
         ).append(
-            $(buildings_spec[buildmode].html).css({
+            $(BUILDING_SPEC[buildmode].html).css({
                 top:'36px',
                 left:'36px'
             })
@@ -160,11 +204,11 @@ function ui_init() {
     update_minimap();
 };
 
-function make_building() {
+function cellclick() {
     var $this = $(this);
     var x = $this.data('x'), y = $this.data('y');
     if(buildings[y][x] === undefined) {
-        var $z = $(buildings_spec[buildmode].html);
+        var $z = $(BUILDING_SPEC[buildmode].html);
         $z.css({
             top: y*RESOLUTION + 'px',
             left: x*RESOLUTION + 'px'
@@ -177,6 +221,32 @@ function make_building() {
     update_minimap();
 };
 
+function cellin() {
+    var $this = $(this);
+    var x = $this.data('x'), y = $this.data('y');
+    $('#xy').text(x + ', ' + y);
+    $('.info-layer, .info-layer-caption').html('');
+    if(items[y][x] !== undefined) {
+        $('#info-items').append(
+            $items[y][x].clone().css({top:0,left:0})
+        );
+        $('#info-items-caption').text();
+    }
+    if(buildings[y][x] !== undefined) {
+        $('#info-buildings').append(
+            $buildings[y][x].clone().css({top:0,left:0})
+        );
+        $('#info-buildings-caption').text(BUILDING_SPEC[buildings[y][x]].name);
+    }
+    if(wires[y][x] !== undefined) {
+        $('#info-wires').append(
+            $wires[y][x].clone().css({top:0,left:0})
+        );
+        $('#info-wires-caption').text();
+    }
+    //if(terrain[y][x] !== undefined) $('#info-terrain').append($terrain[y][x]);
+};
+
 function update_minimap() {
     var minimap = $('#minimap')[0];
     var context = minimap.getContext('2d');
@@ -187,30 +257,39 @@ function update_minimap() {
     context.fill();
     for(var x=0; x<WIDTH; x++) {
         for(var y=0; y<WIDTH; y++) {
+            var _color = undefined;
             if(
                 buildings[y][x] === 'q' ||
                 buildings[y][x] === 'w' ||
                 buildings[y][x] === 'e' ||
                 buildings[y][x] === 'r') {
-                context.beginPath();
-                context.rect(
-                    x*MINIMAP_RESOLUTION, 
-                    y*MINIMAP_RESOLUTION, 
-                    MINIMAP_RESOLUTION, 
-                    MINIMAP_RESOLUTION);
-                context.fillStyle = '#da0';
-                context.fill();
+                _color = '#da0';
             } else if(
                 buildings[y][x] === 'a' ||
                 buildings[y][x] === 's' ||
                 buildings[y][x] === 'd') {
+                _color = '#777';
+            } else if(
+                buildings[y][x] === 't') {
+                _color = '#555';
+            } else if(
+                buildings[y][x] === 'g') {
+                _color = '#aaa';
+            } else if(
+                buildings[y][x] === 'f') {
+                _color = '#222';
+            } else if(
+                buildings[y][x] === 'z') {
+                _color = '#58f'
+            }
+            if(_color !== undefined) {
                 context.beginPath();
                 context.rect(
-                    x*MINIMAP_RESOLUTION, 
-                    y*MINIMAP_RESOLUTION, 
-                    MINIMAP_RESOLUTION, 
+                    x*MINIMAP_RESOLUTION,
+                    y*MINIMAP_RESOLUTION,
+                    MINIMAP_RESOLUTION,
                     MINIMAP_RESOLUTION);
-                context.fillStyle = '#777';
+                context.fillStyle = _color;
                 context.fill();
             }
         }

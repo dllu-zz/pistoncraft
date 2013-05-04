@@ -22,7 +22,7 @@ body {
 
 #toolbar {
 	float: left;
-	width: 620px;
+	width: 400px;
 	height: 180px;
 	padding: 10px;
 	border-right: 1px solid #222;
@@ -63,6 +63,64 @@ body {
 	left: 0px;
 	line-height: 36px;
 	text-align: center;
+}
+
+#infobox {
+	float: left;
+	width: 400px;
+	height: 200px;
+	position: relative;
+	border-right: 1px solid #222;
+}
+
+#infobox>.info-layer-holder>.info-layer {
+	width: 128px;
+	height: 128px;
+	transform: rotate(20deg);
+	position: absolute;
+	top: 0px;
+	left: 40px;
+}
+#infobox>.info-layer-holder {
+	width: 128px;
+	position: absolute;
+	transform: scaleY(0.3);
+}
+
+#infobox>.info-layer-caption {
+	position: absolute;
+	left: 200px;
+	line-height: 32px;
+	height: 32px;
+}
+
+#info-terrain-holder,
+#info-terrain-caption {
+	top: 112px;
+}
+
+#info-wires-holder,
+#info-wires-caption {
+	top: 80px;
+}
+
+#info-buildings-holder,
+#info-buildings-caption {
+	top: 48px;
+}
+
+#info-items-holder,
+#info-items-caption {
+	top: 16px;
+}
+
+#xy {
+	width: 200px;
+	height: 32px;
+	line-height: 32px;
+	text-align: right;
+	float: right;
+	margin-right: 20px;
 }
 
 #minimap-holder {

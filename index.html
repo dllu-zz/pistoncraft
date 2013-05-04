@@ -15,14 +15,35 @@
     <div id="viewport">
         <div id="world">
             <div id="terrain"></div>
+            <div id="wires"></div>
             <div id="buildings"></div>
             <div id="items"></div>
             <div id="lattice"></div>
+            <div id="robots"></div>
         </div>
     </div>
     <div id="ui">
         <div id="toolbar"></div>
         <div id="thumbnail"></div>
+        <div id="infobox">
+            <div id="xy"></div>
+            <div class="info-layer-holder" id="info-terrain-holder">
+                <div class="info-layer" id="info-terrain"></div>
+            </div>
+            <div class="info-layer-caption" id="info-terrain-caption"></div>
+            <div class="info-layer-holder" id="info-wires-holder">
+                <div class="info-layer" id="info-wires"></div>
+            </div>
+            <div class="info-layer-caption" id="info-wires-caption"></div>
+            <div class="info-layer-holder" id="info-buildings-holder">
+                <div class="info-layer" id="info-buildings"></div>
+            </div>
+            <div class="info-layer-caption" id="info-buildings-caption"></div>
+            <div class="info-layer-holder" id="info-items-holder">
+                <div class="info-layer" id="info-items"></div>
+            </div>
+            <div class="info-layer-caption" id="info-items-caption"></div>
+        </div>
         <div id="minimap-holder">
             <canvas id="minimap" width="192" height="192"></canvas>
         </div>
